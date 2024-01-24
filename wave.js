@@ -10,40 +10,79 @@ let forearm_length = 1/8*person_height;
 let torso_length = 2.67/8*person_height;
 let neck_length = 0.33/8*person_height;
 let hand_length = 0.75/8*person_height;
-let x = canvas.width / 2;
-let y = canvas.height / 4;
 
-function draw_line(start_x, start_y, end_x, end_y){
+let ass = [canvas.width / 2,canvas.height / 2];
+
+let hip_angle = -Math.PI/2;
+let neck_angle = -Math.PI/2;
+let head_angle = -Math.PI/2;
+let right_arm_angle = Math.PI/4;
+let left_arm_angle = 3*Math.PI/4;
+let right_forearm_angle = Math.PI/2;
+let left_forearm_angle = Math.PI/2;
+let right_wrist_angle = 0;
+let left_wrist_angle = Math.PI;
+let right_leg_angle = Math.PI/4;
+let left_leg_angle = 3*Math.PI/4;
+let right_knee_angle = Math.PI/2;
+let left_knee_angle = Math.PI/2;
+
+function draw_line(start_position, end_position){
     ctx.beginPath();
-    ctx.moveTo(start_x, start_y);
-    ctx.lineTo(end_x, end_y);
+    ctx.moveTo(start_position[0], start_position[1]);
+    ctx.lineTo(end_position[0], end_position[1]);
     ctx.stroke();
     ctx.closePath();
 }
 
-function draw(){
-    ctx.strokeStyle = "black";
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function draw_circle(center, radius){
     ctx.beginPath();
-    ctx.arc(x, y, head_radius, 0, Math.PI * 2, true);
+    ctx.arc(center[0], center[1], radius, 0, Math.PI * 2, true);
     ctx.stroke();
     ctx.closePath();
+}
 
-    draw_line(x, y+head_radius, x, y+head_radius+neck_length);
-    draw_line(x, y+head_radius+neck_length, x, y+head_radius+neck_length+torso_length);
+function calculate_position(start_position, angle, length){
+    return [start_position[0]+Math.cos(angle)*length, start_position[1]+Math.sin(angle)*length];
+}
+
+function draw(){
+    ctx.strokeStyle = "black";
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //torso
+    neck_base = calculate_position(ass, hip_angle, torso_length);
+    draw_line(ass, neck_base);
+    //neck
+    head_base = calculate_position(neck_base, neck_angle, neck_length);
+    draw_line(neck_base, head_base);
+    //head
+    head_center = calculate_position(head_base, head_angle, head_radius);
+    draw_circle(head_center,head_radius);
     //arms
-    draw_line(x, y+head_radius+neck_length, x+head_radius, y+head_radius+neck_length+arm_length);
-    draw_line(x, y+head_radius+neck_length, x-head_radius, y+head_radius+neck_length+arm_length);
-    draw_line(x+head_radius, y+head_radius+neck_length+arm_length, x+head_radius, y+head_radius+neck_length+arm_length+forearm_length);
-    draw_line(x-head_radius, y+head_radius+neck_length+arm_length, x-head_radius, y+head_radius+neck_length+arm_length+forearm_length);
-    draw_line(x+head_radius, y+head_radius+neck_length+arm_length+forearm_length, x+head_radius, y+head_radius+neck_length+arm_length+forearm_length+hand_length);
-    draw_line(x-head_radius, y+head_radius+neck_length+arm_length+forearm_length, x-head_radius, y+head_radius+neck_length+arm_length+forearm_length+hand_length);
+    right_elbow = calculate_position(neck_base, right_arm_angle, arm_length);
+    left_elbow = calculate_position(neck_base, left_arm_angle, arm_length);
+    draw_line(neck_base, right_elbow);
+    draw_line(neck_base, left_elbow);
+
+    right_wrist = calculate_position(right_elbow, right_forearm_angle, forearm_length);
+    left_wrist = calculate_position(left_elbow, left_forearm_angle, forearm_length);
+    draw_line(right_elbow, right_wrist);
+    draw_line(left_elbow, left_wrist);
+
+    right_fingertips = calculate_position(right_wrist, right_wrist_angle, hand_length);
+    left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_length);
+    draw_line(right_wrist, right_fingertips);
+    draw_line(left_wrist, left_fingertips);
     //legs
-    draw_line(x, y+head_radius+neck_length+torso_length, x+head_radius, y+head_radius+neck_length+torso_length+leg_length);
-    draw_line(x, y+head_radius+neck_length+torso_length, x-head_radius, y+head_radius+neck_length+torso_length+leg_length);
-    draw_line(x+head_radius, y+head_radius+neck_length+torso_length+leg_length, x+head_radius, y+head_radius+neck_length+torso_length+leg_length+shin_length);
-    draw_line(x-head_radius, y+head_radius+neck_length+torso_length+leg_length, x-head_radius, y+head_radius+neck_length+torso_length+leg_length+shin_length);
+    right_knee = calculate_position(ass, right_leg_angle, leg_length);
+    left_knee = calculate_position(ass, left_leg_angle, leg_length)
+    draw_line(ass, right_knee);
+    draw_line(ass, left_knee);
+    
+    right_foot = calculate_position(right_knee, right_knee_angle, shin_length);
+    left_foot = calculate_position(left_knee, left_knee_angle, shin_length);
+    draw_line(right_knee, right_foot);
+    draw_line(left_knee, left_foot);
 }
 
 setInterval(draw, 10);
