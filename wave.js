@@ -46,7 +46,24 @@ function calculate_position(start_position, angle, length){
     return [start_position[0]+Math.cos(angle)*length, start_position[1]+Math.sin(angle)*length];
 }
 
+function move_randomly(speed){
+    hip_angle += speed*(Math.random()-0.5);
+    neck_angle += speed*(Math.random()-0.5);
+    head_angle += speed*(Math.random()-0.5);
+    right_arm_angle += speed*(Math.random()-0.5);
+    left_arm_angle += speed*(Math.random()-0.5);
+    right_forearm_angle += speed*(Math.random()-0.5);
+    left_forearm_angle += speed*(Math.random()-0.5);
+    right_wrist_angle += speed*(Math.random()-0.5);
+    left_wrist_angle += speed*(Math.random()-0.5);
+    right_leg_angle += speed*(Math.random()-0.5);
+    left_leg_angle += speed*(Math.random()-0.5);
+    right_knee_angle += speed*(Math.random()-0.5);
+    left_knee_angle += speed*(Math.random()-0.5);
+}
+
 function draw(){
+    move_randomly(0.1);
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //torso
