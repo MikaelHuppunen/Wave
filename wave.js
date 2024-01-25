@@ -41,7 +41,7 @@ let left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_leng
 
 let baseline_y = canvas.height / 2 - torso_length;
 let middle_x = canvas.width / 2;
-let mass = 1.0;
+let mass = 1.0E4;
 let time = 0;
 let meters_per_pixel = 0.01;
 let wave_speed = 4;
@@ -88,8 +88,8 @@ function calculate_torque(wave_function, time, start_position, end_position, ang
         return 0;
     }
     for(let x = start_position[0]; direction*x <= direction*end_position[0]; x += dx*(end_position[0]-start_position[0])){
-        let y = calculate_position(start_position, angle, Math.abs(x-end_position[0]))[1];
-        torque += (wave_function(x, time)-y)*(end_position[0]-x)*dx*Math.abs(end_position[0]-start_position[0]);
+        let y = calculate_position(start_position, angle, Math.abs(x-start_position[0]))[1];
+        torque += (wave_function(x, time)-y)*(x-start_position[0])*dx*Math.abs(end_position[0]-start_position[0]);
     }
     return torque;
 }
@@ -97,7 +97,7 @@ function calculate_torque(wave_function, time, start_position, end_position, ang
 function angle_change(length, torque, dt){
     let moment_of_inertia = 1/3*mass*(length**2);
     let angular_acceleration = torque/moment_of_inertia;
-    return 1/2*angular_acceleration*dt;
+    return 1/2*angular_acceleration;
 }
 
 function zero_wave(x, time){
@@ -124,9 +124,18 @@ function wave(wave_function, time, dt, dx){
     left_wrist_angle += angle_change(hand_length, torque, dt);
 }
 
+function draw_wave(wave_function, time){
+    let previous_y = wave_function(0, time);
+    for(let x = 0; x < canvas.width; x++){
+        let new_y = wave_function(x, time);
+        draw_line([x-1, previous_y], [x, new_y])
+        previous_y = new_y;
+    }
+}
+
 function draw(){
-    for(let i = 0; i < 10; i++){
-        wave(sine_wave, time, 0.01*1E-1, 1E-3);
+    for(let i = 0; i < 1E2; i++){
+        wave(sine_wave, time, 0.01*1E-2, 1E-2);
     }
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
