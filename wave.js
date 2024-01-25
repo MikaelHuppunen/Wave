@@ -12,6 +12,9 @@ let neck_length = 0.33/8*person_height;
 let hand_length = 0.75/8*person_height;
 
 let neck_base = [canvas.width/2, canvas.height/2-torso_length];
+let floor_height = 450;
+let right_foot = [340, floor_height];
+let left_foot = [268, floor_height];
 
 let body_angle = Math.PI/2;
 let neck_angle = -Math.PI/2;
@@ -22,10 +25,10 @@ let right_forearm_angle = 0;
 let left_forearm_angle = Math.PI;
 let right_wrist_angle = 0;
 let left_wrist_angle = Math.PI;
-let right_leg_angle = Math.PI/4;
-let left_leg_angle = 3*Math.PI/4;
-let right_knee_angle = Math.PI/2;
-let left_knee_angle = Math.PI/2;
+let right_leg_angle = 5*Math.PI/16;
+let left_leg_angle = 11*Math.PI/16;
+let right_knee_angle = 11*Math.PI/16;
+let left_knee_angle = 5*Math.PI/16;
 
 
 let ass = calculate_position(neck_base, body_angle, torso_length);
@@ -127,6 +130,7 @@ function draw(){
     }
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    draw_line([0, floor_height], [canvas.width, floor_height]);
     //torso
     ass = calculate_position(neck_base, body_angle, torso_length);
     draw_line(neck_base, ass);
@@ -152,13 +156,15 @@ function draw(){
     draw_line(right_wrist, right_fingertips);
     draw_line(left_wrist, left_fingertips);
     //legs
+    //assumes that leg_length == shin_length
+    right_leg_angle = 2*Math.atan((2*leg_length-Math.sqrt(4*leg_length**2-(right_foot[1]-ass[1])**2))/(right_foot[1]-ass[1]))-Math.atan((right_foot[0]-ass[0])/(right_foot[1]-ass[1]));
+    left_leg_angle = 2*Math.atan((2*leg_length+Math.sqrt(4*leg_length**2-(right_foot[1]-ass[1])**2))/(right_foot[1]-ass[1]))+Math.atan((right_foot[0]-ass[0])/(right_foot[1]-ass[1]));
+    
     right_knee = calculate_position(ass, right_leg_angle, leg_length);
-    left_knee = calculate_position(ass, left_leg_angle, leg_length)
+    left_knee = calculate_position(ass, left_leg_angle, leg_length);
     draw_line(ass, right_knee);
     draw_line(ass, left_knee);
     
-    right_foot = calculate_position(right_knee, right_knee_angle, shin_length);
-    left_foot = calculate_position(left_knee, left_knee_angle, shin_length);
     draw_line(right_knee, right_foot);
     draw_line(left_knee, left_foot);
 
