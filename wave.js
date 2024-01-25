@@ -11,9 +11,9 @@ let torso_length = 2.67/8*person_height;
 let neck_length = 0.33/8*person_height;
 let hand_length = 0.75/8*person_height;
 
-let ass = [canvas.width / 2,canvas.height / 2];
+let neck_base = [canvas.width/2, canvas.height/2-torso_length];
 
-let hip_angle = -Math.PI/2;
+let body_angle = Math.PI/2;
 let neck_angle = -Math.PI/2;
 let head_angle = -Math.PI/2;
 let right_arm_angle = 0;
@@ -27,7 +27,8 @@ let left_leg_angle = 3*Math.PI/4;
 let right_knee_angle = Math.PI/2;
 let left_knee_angle = Math.PI/2;
 
-let neck_base = calculate_position(ass, hip_angle, torso_length);
+
+let ass = calculate_position(neck_base, body_angle, torso_length);
 let right_elbow = calculate_position(neck_base, right_arm_angle, arm_length);
 let left_elbow = calculate_position(neck_base, left_arm_angle, arm_length);
 let right_wrist = calculate_position(right_elbow, right_forearm_angle, forearm_length);
@@ -37,10 +38,10 @@ let left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_leng
 
 let baseline_y = canvas.height / 2 - torso_length;
 let middle_x = canvas.width / 2;
-let density = 1.0E-4;
+let mass = 1.0;
 let time = 0;
 let meters_per_pixel = 0.01;
-let wave_speed = 2;
+let wave_speed = 4;
 
 function draw_line(start_position, end_position){
     ctx.beginPath();
@@ -62,7 +63,7 @@ function calculate_position(start_position, angle, length){
 }
 
 function move_randomly(speed){
-    hip_angle += speed*(Math.random()-0.5);
+    body_angle += speed*(Math.random()-0.5);
     neck_angle += speed*(Math.random()-0.5);
     head_angle += speed*(Math.random()-0.5);
     right_arm_angle += speed*(Math.random()-0.5);
@@ -91,9 +92,9 @@ function calculate_torque(wave_function, time, start_position, end_position, ang
 }
 
 function angle_change(length, torque, dt){
-    let moment_of_inertia = 1/3*density*length**3;
+    let moment_of_inertia = 1/3*mass*(length**2);
     let angular_acceleration = torque/moment_of_inertia;
-    return 1/2*angular_acceleration*(dt**2);
+    return 1/2*angular_acceleration*dt;
 }
 
 function zero_wave(x, time){
@@ -121,11 +122,14 @@ function wave(wave_function, time, dt, dx){
 }
 
 function draw(){
-    wave(sine_wave, time, 0.01, 1E-4);
+    for(let i = 0; i < 10; i++){
+        wave(sine_wave, time, 0.01*1E-1, 1E-3);
+    }
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //torso
-    draw_line(ass, neck_base);
+    ass = calculate_position(neck_base, body_angle, torso_length);
+    draw_line(neck_base, ass);
     //neck
     head_base = calculate_position(neck_base, neck_angle, neck_length);
     draw_line(neck_base, head_base);
