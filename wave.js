@@ -18,14 +18,25 @@ let neck_angle = -Math.PI/2;
 let head_angle = -Math.PI/2;
 let right_arm_angle = Math.PI/4;
 let left_arm_angle = 3*Math.PI/4;
-let right_forearm_angle = Math.PI/2;
-let left_forearm_angle = Math.PI/2;
+let right_forearm_angle = 3*Math.PI/8;
+let left_forearm_angle = 5*Math.PI/8;
 let right_wrist_angle = 0;
 let left_wrist_angle = Math.PI;
 let right_leg_angle = Math.PI/4;
 let left_leg_angle = 3*Math.PI/4;
 let right_knee_angle = Math.PI/2;
 let left_knee_angle = Math.PI/2;
+
+let neck_base = calculate_position(ass, hip_angle, torso_length);
+let right_elbow = calculate_position(neck_base, right_arm_angle, arm_length);
+let left_elbow = calculate_position(neck_base, left_arm_angle, arm_length);
+let right_wrist = calculate_position(right_elbow, right_forearm_angle, forearm_length);
+let left_wrist = calculate_position(left_elbow, left_forearm_angle, forearm_length);
+let right_fingertips = calculate_position(right_wrist, right_wrist_angle, hand_length);
+let left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_length);
+
+let baseline_y = canvas.height / 2 - torso_length;
+let density = 1.0E-4;
 
 function draw_line(start_position, end_position){
     ctx.beginPath();
@@ -62,12 +73,47 @@ function move_randomly(speed){
     left_knee_angle += speed*(Math.random()-0.5);
 }
 
+function calculate_torque(start_position, end_position, angle, dx){
+    let torque = 0;
+    let direction = Math.sign(end_position[0]-start_position[0]);
+    if(direction == 0){
+        return 0;
+    }
+    for(let x = start_position[0]; direction*x <= direction*end_position[0]; x += dx*(end_position[0]-start_position[0])){
+        let y = calculate_position(start_position, angle, Math.abs(x-end_position[0]))[1];
+        torque += (baseline_y-y)*(end_position[0]-x);
+    }
+    return torque;
+}
+
+function angle_change(length, torque, dt){
+    let moment_of_inertia = 1/3*density*length**3;
+    let angular_acceleration = torque/moment_of_inertia;
+    return 1/2*angular_acceleration*(dt**2);
+}
+
+function zero_wave(dt, dx){
+    neck_base[1] = baseline_y;
+
+    let torque = calculate_torque(neck_base, right_elbow, right_arm_angle, dx);
+    right_arm_angle += angle_change(arm_length, torque, dt);
+    torque = calculate_torque(neck_base, left_elbow, left_arm_angle, dx);
+    left_arm_angle += angle_change(arm_length, torque, dt);
+    torque = calculate_torque(right_elbow, right_wrist, right_forearm_angle, dx);
+    right_forearm_angle += angle_change(forearm_length, torque, dt);
+    torque = calculate_torque(left_elbow, left_wrist, left_forearm_angle, dx);
+    left_forearm_angle += angle_change(forearm_length, torque, dt);
+    torque = calculate_torque(right_wrist, right_fingertips, right_wrist_angle, dx);
+    right_wrist_angle += angle_change(hand_length, torque, dt);
+    torque = calculate_torque(left_wrist, left_fingertips, left_wrist_angle, dx);
+    left_wrist_angle += angle_change(hand_length, torque, dt);
+}
+
 function draw(){
-    move_randomly(0.1);
+    zero_wave(0.01, 0.01);
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //torso
-    neck_base = calculate_position(ass, hip_angle, torso_length);
     draw_line(ass, neck_base);
     //neck
     head_base = calculate_position(neck_base, neck_angle, neck_length);
