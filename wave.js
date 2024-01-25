@@ -16,10 +16,10 @@ let ass = [canvas.width / 2,canvas.height / 2];
 let hip_angle = -Math.PI/2;
 let neck_angle = -Math.PI/2;
 let head_angle = -Math.PI/2;
-let right_arm_angle = Math.PI/4;
-let left_arm_angle = 3*Math.PI/4;
-let right_forearm_angle = 3*Math.PI/8;
-let left_forearm_angle = 5*Math.PI/8;
+let right_arm_angle = 0;
+let left_arm_angle = Math.PI;
+let right_forearm_angle = 0;
+let left_forearm_angle = Math.PI;
 let right_wrist_angle = 0;
 let left_wrist_angle = Math.PI;
 let right_leg_angle = Math.PI/4;
@@ -38,6 +38,9 @@ let left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_leng
 let baseline_y = canvas.height / 2 - torso_length;
 let middle_x = canvas.width / 2;
 let density = 1.0E-4;
+let time = 0;
+let meters_per_pixel = 0.01;
+let wave_speed = 2;
 
 function draw_line(start_position, end_position){
     ctx.beginPath();
@@ -82,7 +85,7 @@ function calculate_torque(wave_function, time, start_position, end_position, ang
     }
     for(let x = start_position[0]; direction*x <= direction*end_position[0]; x += dx*(end_position[0]-start_position[0])){
         let y = calculate_position(start_position, angle, Math.abs(x-end_position[0]))[1];
-        torque += (wave_function(x, time)-y)*(end_position[0]-x);
+        torque += (wave_function(x, time)-y)*(end_position[0]-x)*dx*Math.abs(end_position[0]-start_position[0]);
     }
     return torque;
 }
@@ -95,6 +98,10 @@ function angle_change(length, torque, dt){
 
 function zero_wave(x, time){
     return baseline_y;
+}
+
+function sine_wave(x, time){
+    return baseline_y-0.3*Math.sin(meters_per_pixel*(x-middle_x)+wave_speed*time)/meters_per_pixel
 }
 
 function wave(wave_function, time, dt, dx){
@@ -114,7 +121,7 @@ function wave(wave_function, time, dt, dx){
 }
 
 function draw(){
-    wave(zero_wave, 0, 0.01, 0.01);
+    wave(sine_wave, time, 0.01, 1E-4);
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     //torso
@@ -150,6 +157,8 @@ function draw(){
     left_foot = calculate_position(left_knee, left_knee_angle, shin_length);
     draw_line(right_knee, right_foot);
     draw_line(left_knee, left_foot);
+
+    time += 0.01;
 }
 
 setInterval(draw, 10);
