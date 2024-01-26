@@ -94,10 +94,6 @@ function calculate_torque(wave_function, time, start_position, end_position, ang
     return torque;
 }
 
-function angle_change(length, torque, dt){
-    return torque/mass;
-}
-
 function zero_wave(x, time){
     return baseline_y;
 }
@@ -116,18 +112,36 @@ function triangle_wave(x, time){
 
 function wave(wave_function, time, dt, dx){
     neck_base[1] = wave_function(middle_x, time);
+
+    //right arm
     let torque = calculate_torque(wave_function, time, neck_base, right_elbow, right_arm_angle, dx);
-    right_arm_angle += angle_change(arm_length, torque, dt);
-    torque = calculate_torque(wave_function, time, neck_base, left_elbow, left_arm_angle, dx);
-    left_arm_angle += angle_change(arm_length, torque, dt);
+    let angle_change = torque/mass;
+    right_arm_angle += angle_change;
+    right_forearm_angle -= angle_change;
+
     torque = calculate_torque(wave_function, time, right_elbow, right_wrist, right_forearm_angle, dx);
-    right_forearm_angle += angle_change(forearm_length, torque, dt);
-    torque = calculate_torque(wave_function, time, left_elbow, left_wrist, left_forearm_angle, dx);
-    left_forearm_angle += angle_change(forearm_length, torque, dt);
+    angle_change = torque/mass;
+    right_forearm_angle += angle_change;
+    right_wrist_angle -= angle_change;
+
     torque = calculate_torque(wave_function, time, right_wrist, right_fingertips, right_wrist_angle, dx);
-    right_wrist_angle += angle_change(hand_length, torque, dt);
+    angle_change = torque/mass;
+    right_wrist_angle += angle_change;
+
+    //left arm
+    torque = calculate_torque(wave_function, time, neck_base, left_elbow, left_arm_angle, dx);
+    angle_change = torque/mass;
+    left_arm_angle += angle_change;
+    left_forearm_angle -= angle_change;
+
+    torque = calculate_torque(wave_function, time, left_elbow, left_wrist, left_forearm_angle, dx);
+    angle_change = torque/mass;
+    left_forearm_angle += angle_change;
+    left_wrist_angle -= angle_change;
+
     torque = calculate_torque(wave_function, time, left_wrist, left_fingertips, left_wrist_angle, dx);
-    left_wrist_angle += angle_change(hand_length, torque, dt);
+    angle_change = torque/mass;
+    left_wrist_angle += angle_change;
 }
 
 function draw_wave(wave_function, time){
