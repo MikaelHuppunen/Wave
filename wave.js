@@ -16,28 +16,12 @@ let floor_height = 450;
 let right_foot = [340, floor_height];
 let left_foot = [268, floor_height];
 
-let body_angle = Math.PI/2;
-let neck_angle = -Math.PI/2;
-let head_angle = -Math.PI/2;
-let right_arm_angle = 0;
-let left_arm_angle = Math.PI;
-let right_forearm_angle = 0;
-let left_forearm_angle = Math.PI;
-let right_wrist_angle = 0;
-let left_wrist_angle = Math.PI;
-let right_leg_angle = 5*Math.PI/16;
-let left_leg_angle = 11*Math.PI/16;
-let right_knee_angle = 11*Math.PI/16;
-let left_knee_angle = 5*Math.PI/16;
+let body_angle = Math.PI/2, neck_angle = -Math.PI/2, head_angle = -Math.PI/2, right_arm_angle = 0, left_arm_angle = Math.PI
+, right_forearm_angle = 0, left_forearm_angle = Math.PI, right_wrist_angle = 0, left_wrist_angle = Math.PI
+, right_leg_angle = 5*Math.PI/16, left_leg_angle = 11*Math.PI/16, right_knee_angle = 11*Math.PI/16, left_knee_angle = 5*Math.PI/16;
 
 
-let ass = calculate_position(neck_base, body_angle, torso_length);
-let right_elbow = calculate_position(neck_base, right_arm_angle, arm_length);
-let left_elbow = calculate_position(neck_base, left_arm_angle, arm_length);
-let right_wrist = calculate_position(right_elbow, right_forearm_angle, forearm_length);
-let left_wrist = calculate_position(left_elbow, left_forearm_angle, forearm_length);
-let right_fingertips = calculate_position(right_wrist, right_wrist_angle, hand_length);
-let left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_length);
+let ass, right_elbow, left_elbow, right_wrist, left_wrist, right_fingertips, left_fingertips;
 
 let baseline_y = canvas.height / 2 - torso_length;
 let middle_x = canvas.width / 2;
@@ -46,6 +30,16 @@ let time = 0;
 let meters_per_pixel = 0.01;
 let wave_speed = 4;
 let selected_menu_option = 0;
+
+function set_initial_positions(){
+    ass = calculate_position(neck_base, body_angle, torso_length);
+    right_elbow = calculate_position(neck_base, right_arm_angle, arm_length);
+    left_elbow = calculate_position(neck_base, left_arm_angle, arm_length);
+    right_wrist = calculate_position(right_elbow, right_forearm_angle, forearm_length);
+    left_wrist = calculate_position(left_elbow, left_forearm_angle, forearm_length);
+    right_fingertips = calculate_position(right_wrist, right_wrist_angle, hand_length);
+    left_fingertips = calculate_position(left_wrist, left_wrist_angle, hand_length);
+}
 
 function draw_line(start_position, end_position){
     ctx.beginPath();
@@ -173,22 +167,22 @@ document.querySelectorAll('#menuForm input[type=radio]').forEach(radio => {
     });
 });
 
-function draw(){
-    let chosen_wave;
+function choose_waveform(){
     switch(selected_menu_option){
         case 0:
-            chosen_wave = sine_wave;
-            break;
+            return sine_wave;
         case 1:
-            chosen_wave = triangle_wave;
-            break;
+            return triangle_wave;
         case 2:
-            chosen_wave = square_wave;
-            break;
+            return square_wave;
         case 3:
-            chosen_wave = zero_wave;
-            break;
+            return zero_wave;
     }
+}
+
+function draw(){
+    let chosen_wave = choose_waveform();;
+    
     let time_steps_per_frame = 1E3;
     for(let i = 0; i < time_steps_per_frame; i++){
         wave(chosen_wave, time, 0.01/time_steps_per_frame, 1E-1);
@@ -236,4 +230,5 @@ function draw(){
     time += 0.01;
 }
 
+set_initial_positions();
 setInterval(draw, 10);
