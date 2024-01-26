@@ -87,7 +87,8 @@ function calculate_torque(wave_function, time, start_position, end_position, ang
     if(direction == 0){
         return 0;
     }
-    for(let x = start_position[0]; direction*x <= direction*end_position[0]; x += dx*(end_position[0]-start_position[0])){
+    let margin_of_error = 1E-6
+    for(let x = start_position[0]; direction*x <= direction*end_position[0]-margin_of_error; x += dx*(end_position[0]-start_position[0])){
         let y = calculate_position(start_position, angle, Math.abs(x-start_position[0]))[1];
         torque += (wave_function(x, time)-y)*(x-start_position[0])*dx*Math.abs(end_position[0]-start_position[0]);
     }
@@ -102,6 +103,14 @@ function sine_wave(x, time){
     return baseline_y-0.3*Math.sin(meters_per_pixel*(x-middle_x)+wave_speed*time)/meters_per_pixel
 }
 
+function sine_wave(x, time){
+    return baseline_y-0.3*Math.sin(meters_per_pixel*(x-middle_x)+wave_speed*time)/meters_per_pixel
+}
+
+function mirror_wave(x, time){
+    return baseline_y-0.3*Math.sin(meters_per_pixel*Math.abs(x-middle_x)+wave_speed*time)/meters_per_pixel
+}
+
 function square_wave(x, time){
     return baseline_y-0.3*Math.sign(Math.sin(meters_per_pixel*(x-middle_x)+wave_speed*time))/meters_per_pixel
 }
@@ -111,6 +120,8 @@ function triangle_wave(x, time){
 }
 
 function wave(wave_function, time, dt, dx){
+    right_arm_angle -= Math.atan(2*(wave_function(middle_x, time)-neck_base[1])/(right_elbow[0]-neck_base[0]));
+    left_arm_angle -= Math.atan(2*(wave_function(middle_x, time)-neck_base[1])/(left_elbow[0]-neck_base[0]));
     neck_base[1] = wave_function(middle_x, time);
 
     //right arm
@@ -154,8 +165,10 @@ function draw_wave(wave_function, time){
 }
 
 function draw(){
-    for(let i = 0; i < 1E3; i++){
-        wave(sine_wave, time, 0.01*1E-3, 1E-1);
+    let chosen_wave = sine_wave;
+    let time_steps_per_frame = 1E3;
+    for(let i = 0; i < time_steps_per_frame; i++){
+        wave(chosen_wave, time, 0.01/time_steps_per_frame, 1E-1);
     }
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
