@@ -45,6 +45,7 @@ let mass = 1.0E8;
 let time = 0;
 let meters_per_pixel = 0.01;
 let wave_speed = 4;
+let selected_menu_option = 0;
 
 function draw_line(start_position, end_position){
     ctx.beginPath();
@@ -164,8 +165,30 @@ function draw_wave(wave_function, time){
     }
 }
 
+document.querySelectorAll('#menuForm input[type=radio]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if(this.checked) {
+            selected_menu_option = +this.value;
+        }
+    });
+});
+
 function draw(){
-    let chosen_wave = sine_wave;
+    let chosen_wave;
+    switch(selected_menu_option){
+        case 0:
+            chosen_wave = sine_wave;
+            break;
+        case 1:
+            chosen_wave = triangle_wave;
+            break;
+        case 2:
+            chosen_wave = square_wave;
+            break;
+        case 3:
+            chosen_wave = zero_wave;
+            break;
+    }
     let time_steps_per_frame = 1E3;
     for(let i = 0; i < time_steps_per_frame; i++){
         wave(chosen_wave, time, 0.01/time_steps_per_frame, 1E-1);

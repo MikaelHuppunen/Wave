@@ -1,16 +1,51 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>wave</title>
-		<style>
-            canvas{
-                display: block;
-                margin: 0 auto;
-            }
-        </style>
-    </head>
+<head>
+    <title>wave</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: start;
+            padding-top: 20px;
+        }
+
+        #canvas {
+            margin-right: 20px;
+        }
+
+        #menuForm {
+            display: block;
+        }
+    </style>
+</head>
+<body>
     <canvas id="canvas" width="608" height="608"></canvas>
-    <script src="wave.js"></script>
-    <body>
-    </body>
+
+    <form id="menuForm">
+        <h2>Select Waveform</h2>
+        
+        <div>
+            <input type="radio" id="option1" name="option" value=0>
+            <label>Sine wave</label>
+        </div>
+
+        <div>
+            <input type="radio" id="option2" name="option" value=1>
+            <label for="option2">Triangle wave</label>
+        </div>
+
+        <div>
+            <input type="radio" id="option3" name="option" value=2>
+            <label for="option3">Square wave</label>
+        </div>
+
+        <div>
+            <input type="radio" id="option4" name="option" value=3>
+            <label for="option4">0</label>
+        </div>
+    </form>
+    
+    <script src = wave.js></script>
+</body>
 </html>
