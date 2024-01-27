@@ -1,21 +1,18 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-let person_height = 400;
-let head_radius = person_height/16;
-let leg_length = person_height/4;
-let shin_length = person_height/4;
-let arm_length = 1.67/8*person_height;
-let forearm_length = 1/8*person_height;
-let torso_length = 2.67/8*person_height;
-let neck_length = 0.33/8*person_height;
-let hand_length = 0.75/8*person_height;
+//set sizes
+let person_height = 400, head_radius = person_height/16, leg_length = person_height/4, shin_length = person_height/4
+, arm_length = 1.67/8*person_height, forearm_length = 1/8*person_height, torso_length = 2.67/8*person_height
+, neck_length = 0.33/8*person_height, hand_length = 0.75/8*person_height;
 
+//set starting positions
 let neck_base = [canvas.width/2, canvas.height/2-torso_length];
 let floor_height = 450;
 let right_foot = [340, floor_height];
 let left_foot = [268, floor_height];
 
+//set angles
 let body_angle = Math.PI/2, neck_angle = -Math.PI/2, head_angle = -Math.PI/2, right_arm_angle = 0, left_arm_angle = Math.PI
 , right_forearm_angle = 0, left_forearm_angle = Math.PI, right_wrist_angle = 0, left_wrist_angle = Math.PI
 , right_leg_angle = 5*Math.PI/16, left_leg_angle = 11*Math.PI/16, right_knee_angle = 11*Math.PI/16, left_knee_angle = 5*Math.PI/16;
@@ -180,15 +177,25 @@ function choose_waveform(){
     }
 }
 
-function draw(){
-    let chosen_wave = choose_waveform();;
-    
+function simulate_movement(chosen_wave){
     let time_steps_per_frame = 1E3;
     for(let i = 0; i < time_steps_per_frame; i++){
         wave(chosen_wave, time, 0.01/time_steps_per_frame, 1E-1);
     }
+}
+
+function get_leg_angle(foot, bending_direction){
+    //assumes that leg_length == shin_length
+    return 2*Math.atan((2*leg_length-bending_direction*Math.sqrt(4*leg_length**2-(foot[1]-ass[1])**2))/(foot[1]-ass[1]))-Math.atan((foot[0]-ass[0])/(foot[1]-ass[1]));
+}
+
+function draw(){
+    let chosen_wave = choose_waveform();
+    simulate_movement(chosen_wave);
+    
     ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     draw_line([0, floor_height], [canvas.width, floor_height]);
     //torso
     ass = calculate_position(neck_base, body_angle, torso_length);
@@ -215,9 +222,8 @@ function draw(){
     draw_line(right_wrist, right_fingertips);
     draw_line(left_wrist, left_fingertips);
     //legs
-    //assumes that leg_length == shin_length
-    right_leg_angle = 2*Math.atan((2*leg_length-Math.sqrt(4*leg_length**2-(right_foot[1]-ass[1])**2))/(right_foot[1]-ass[1]))-Math.atan((right_foot[0]-ass[0])/(right_foot[1]-ass[1]));
-    left_leg_angle = 2*Math.atan((2*leg_length+Math.sqrt(4*leg_length**2-(right_foot[1]-ass[1])**2))/(right_foot[1]-ass[1]))+Math.atan((right_foot[0]-ass[0])/(right_foot[1]-ass[1]));
+    right_leg_angle = get_leg_angle(right_foot, 1);
+    left_leg_angle = get_leg_angle(left_foot, -1);
     
     right_knee = calculate_position(ass, right_leg_angle, leg_length);
     left_knee = calculate_position(ass, left_leg_angle, leg_length);
